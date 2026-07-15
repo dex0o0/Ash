@@ -33,7 +33,7 @@ pacman_cache() {
 
   if ls /var/cache/pacman/pkg/download-* &>/dev/null; then
     say "Removing incomplete download files from cache.."
-    rm -rfd /var/cache/pacman/pkg/download-*
+    find /var/cache/pacman/pkg/ -maxdepth 1 -type d -name "download-*" -exec rm -rf {} + &>/dev/null
   fi
 
   if command -v paccache &>/dev/null; then
