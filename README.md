@@ -19,22 +19,26 @@
 ## Installation & Usage
 
 ### 1. Clone the repository
+
 ```bash
-git clone [https://github.com/dex0o0/CLI.git](https://github.com/dex0o0/CLI.git)
+git clone https://github.com/dex0o0/Ash.git
 cd CLI
 ```
 
 ### 2. Make the script executable
+
 ```bash
 chmod +x ash.sh
 ```
 
 ### 3. Run ASH
+
 ```bash
 sudo ./ash.sh
 ```
 
 ## Requirements
-- **OS**:Arch Linux (or any Arch-based distribution like EndeavourOS,Manjaro,etc.)
-- **AUR Helper**:`yay` (optional,but highly recommended for AUR cache cleaning)
-- **Privileges**:`sudo` access
+
+- **OS**: Arch Linux (or any Arch-based distribution like EndeavourOS,Manjaro,etc.)
+- **AUR Helper**: `yay` (optional,but highly recommended for AUR cache cleaning)
+- **Privileges**: `sudo` access
