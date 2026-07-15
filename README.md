@@ -22,7 +22,7 @@
 
 ```bash
 git clone https://github.com/dex0o0/Ash.git
-cd CLI
+cd Ash
 ```
 
 ### 2. Make the script executable
