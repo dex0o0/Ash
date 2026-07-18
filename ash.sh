@@ -14,15 +14,14 @@ USER_HOME=$(eval echo "~$REAL_USER")
 TRASH_DIR="$USER_HOME/.local/share/Trash"
 
 perror() {
-  echo -e "[${RED}ERROR${NC}] ${YELLOW}$1${NC}"
+  echo -e "[${RED}ERROR${NC}] ${YELLOW}$1${NC}\n"
 }
-
 wsay() {
   echo -e "${GREEN}==>${NC} ${BOLD}${WHITE}$1${NC}"
 }
 
 warning() {
-  echo -e "${GREEN}==>${NC} ${BOLD}${YELLOW}$1${NC}"
+  echo -e "${GREEN}==>${NC} ${BOLD}${YELLOW}$1${NC}\n"
 }
 
 success() {
