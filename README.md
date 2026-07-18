@@ -8,9 +8,9 @@
 
 - **Pacman Cache Cleaner:** Safely cleans Pacman cache, retaining only the latest installed packages (prevents `Error reading fd 7` by auto-cleaning incomplete downloads).
 - **Yay Cache Cleaner:** Purges AUR build caches under user directories and syncs packages without nagging password prompts.
+  Interactive cleanup of your local `~/.cache/yay` directory.
 - **Orphan Sweeper:** Automatically detects and removes unused orphan packages (`nosave`).
 - **Systemd Log Vacuum:** Clears archived Systemd journals to reclaim disk space.
-- **User Cache Sweeper:** Interactive cleanup of your local `~/.cache` directory.
 - **Trash Can Emptier:** Instantly empties your user trash.
 - **All-in-One Execution:** Run all cleaning routines in one go!
 
