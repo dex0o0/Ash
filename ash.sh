@@ -18,11 +18,15 @@ perror() {
 }
 
 wsay() {
-  echo -e "${GREEN}==>${NC} ${WHITE}$1${NC}"
+  echo -e "${GREEN}==>${NC} ${BOLD}${WHITE}$1${NC}"
+}
+
+warning() {
+  echo -e "${GREEN}==>${NC} ${BOLD}${YELLOW}$1${NC}"
 }
 
 success() {
-  echo -e "[${GREEN}+${NC}] ${GREEN}$1${NC}"
+  echo -e "[${GREEN}+${NC}] ${GREEN}$1${NC}\n"
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -46,6 +50,34 @@ pacman_cache() {
     pacman -Scc
   fi
   success "Pacman cache cleared successfully"
+}
+
+remove() {
+  sudo -u "$REAL_USER" rm -rf "$1"
+  wsay "removed $1"
+}
+
+user_cache() {
+
+  if [ -d "$USER_HOME/.cache" ]; then
+    CACHE_DIR="$USER_HOME/.cache/yay"
+    cache_size=$(du -sh "$CACHE_DIR" 2>/dev/null | cut -f1)
+
+    if [[ -d "$CACHE_DIR" ]]; then
+      wsay "Current user yay cache size:${BLUE}$cache_size${NC}"
+      echo -ne "${YELLOW}Do you want to clear ~/.cache/yay completely? (y/N):${NC}"
+      read -r confirm
+      if [[ $confirm =~ ^[Yy]$ ]]; then
+        sudo -u "$REAL_USER" find "$CACHE_DIR" -mindepth 1 -delete 2>/dev/null
+      else
+        echo -e "${BLUE}Skipped${NC}"
+      fi
+      success "yay cache directory contents cleared"
+    fi
+  else
+    warning "~/.cache directory not found."
+  fi
+  warning "~/.cache/yay directory not found"
 }
 
 yay_cache() {
@@ -87,35 +119,6 @@ logs() {
   success "System logs cleaned"
 }
 
-remove() {
-  sudo -u "$REAL_USER" rm -rf "$1"
-  wsay "removed $1"
-}
-
-user_cache() {
-
-  if [ -d "$USER_HOME/.cache" ]; then
-    cache_size=$(du -sh "$USER_HOME/.cache" 2>/dev/null | cut -f1)
-    wsay "Current user cache size:${BLUE}$cache_size${NC}"
-    echo -ne "${YELLOW}Do you want to clear ~/.cache completely? (y/N):${NC}"
-    read -r confirm
-    if [[ $confirm =~ ^[Yy]$ ]]; then
-
-      list=$(sudo -u "$REAL_USER" ls -lhad "$USER_HOME/.cache"/* | grep -e "^d" | awk '{print $9}')
-
-      for i in $list; do
-        remove "$i"
-      done
-
-      success "User cache cleared"
-    else
-      echo -e "${BLUE}Skipped${NC}"
-    fi
-  else
-    perror "~/.cache directory not found."
-  fi
-}
-
 trash_clear() {
   if [ -d "$TRASH_DIR" ]; then
     sudo -u "$REAL_USER" rm -rf "$TRASH_DIR"/*
@@ -145,11 +148,11 @@ echo -e "${GREEN}1${NC}: ${BLUE}Pacman Cache${NC}"
 echo -e "${GREEN}2${NC}: ${BLUE}yay Cache${NC}"
 echo -e "${GREEN}3${NC}: ${BLUE}Orphan Packages${NC}"
 echo -e "${GREEN}4${NC}: ${BLUE}System Logs${NC}"
-echo -e "${GREEN}5${NC}: ${BLUE}User Cache${NC}"
+echo -e "${GREEN}5${NC}: ${BLUE}yay Cache (force delete)${NC}"
 echo -e "${GREEN}6${NC}: ${BLUE}Trash Clear${NC}"
 echo -e "${GREEN}7${NC}: ${BLUE}Clear All${NC}"
 
-echo -ne "\n${WHITE}${BOLD}What is your choice${NC}?"
+echo -ne "\n${WHITE}${BOLD}What is your choice${NC}? "
 read choice
 
 case "$choice" in
