@@ -6,6 +6,8 @@ RED='\033[31m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
 BLUE='\033[34m'
+WHITE='\033[97m'
+BOLD='\033[1m'
 NC='\033[0m'
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo "~$REAL_USER")
@@ -15,8 +17,8 @@ perror() {
   echo -e "[${RED}ERROR${NC}] ${YELLOW}$1${NC}"
 }
 
-say() {
-  echo -e "${GREEN}==>${NC} ${YELLOW}$1${NC}"
+wsay() {
+  echo -e "${GREEN}==>${NC} ${WHITE}$1${NC}"
 }
 
 success() {
@@ -29,10 +31,10 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 pacman_cache() {
-  say "Cleaning Pacman cache..."
+  wsay "Cleaning Pacman cache..."
 
   if ls /var/cache/pacman/pkg/download-* &>/dev/null; then
-    say "Removing incomplete download files from cache.."
+    wsay "Removing incomplete download files from cache.."
     find /var/cache/pacman/pkg/ -maxdepth 1 -type d -name "download-*" -exec rm -rf {} + &>/dev/null
   fi
 
@@ -40,14 +42,14 @@ pacman_cache() {
     paccache -r -k 2
     paccache -rk0
   else
-    say "paccache not found. Using basic pacman clean..."
+    wsay "paccache not found. Using basic pacman clean..."
     pacman -Scc
   fi
   success "Pacman cache cleared successfully"
 }
 
 yay_cache() {
-  say "Cleaning yay cache..."
+  wsay "Cleaning yay cache..."
   if command -v yay &>/dev/null; then
     echo -e "y\ny\ny" | yay -Sc --noconfirm &>/dev/null
     success "Pacman cache cleared successfully"
@@ -57,12 +59,12 @@ yay_cache() {
 }
 
 orphan_pack() {
-  say "Checking for orphan packages..."
+  wsay "Checking for orphan packages..."
   orphan=$(pacman -Qtdq)
   if [ -z "$orphan" ]; then
     success "No orphan packages found"
   else
-    say "Found orphan packages:"
+    wsay "Found orphan packages:"
     echo "$orphan"
     echo -ne "Do you want to remove them? (y/N):"
     read -r confirm
@@ -76,7 +78,7 @@ orphan_pack() {
 }
 
 logs() {
-  say "Cleaning Systemd journal logs..."
+  wsay "Cleaning Systemd journal logs..."
 
   journalctl --vacuum-time=2weeks &>/dev/null
   if [ -d /var/lib/systemd/coredump ]; then
@@ -85,14 +87,26 @@ logs() {
   success "System logs cleaned"
 }
 
+remove() {
+  sudo -u "$REAL_USER" rm -rf "$1"
+  wsay "removed $1"
+}
+
 user_cache() {
+
   if [ -d "$USER_HOME/.cache" ]; then
     cache_size=$(du -sh "$USER_HOME/.cache" 2>/dev/null | cut -f1)
-    say "Current user cache size:${BLUE}$cache_size${NC}"
+    wsay "Current user cache size:${BLUE}$cache_size${NC}"
     echo -ne "${YELLOW}Do you want to clear ~/.cache completely? (y/N):${NC}"
     read -r confirm
     if [[ $confirm =~ ^[Yy]$ ]]; then
-      sudo -u "$REAL_USER" rm -rf "$USER_HOME/.cache"/*
+
+      list=$(sudo -u "$REAL_USER" ls -lhad "$USER_HOME/.cache"/* | grep -e "^d" | awk '{print $9}')
+
+      for i in $list; do
+        remove "$i"
+      done
+
       success "User cache cleared"
     else
       echo -e "${BLUE}Skipped${NC}"
@@ -112,7 +126,7 @@ trash_clear() {
 }
 
 all() {
-  say "Runing ALL cleaning processes..."
+  wsay "Runing ALL cleaning processes..."
   pacman_cache
   yay_cache
   orphan_pack
@@ -126,9 +140,6 @@ clear
 sleep 0.02
 
 figlet -f slant "ASH"
-echo -e "${YELLOW}==================================${NC}"
-echo -e "${GREEN}a system clear for Arch linux${NC}"
-echo -e "${YELLOW}==================================${NC}\n"
 
 echo -e "${GREEN}1${NC}: ${BLUE}Pacman Cache${NC}"
 echo -e "${GREEN}2${NC}: ${BLUE}yay Cache${NC}"
@@ -138,7 +149,7 @@ echo -e "${GREEN}5${NC}: ${BLUE}User Cache${NC}"
 echo -e "${GREEN}6${NC}: ${BLUE}Trash Clear${NC}"
 echo -e "${GREEN}7${NC}: ${BLUE}Clear All${NC}"
 
-echo -ne "\n${YELLOW}What is your choice${NC}?"
+echo -ne "\n${WHITE}${BOLD}What is your choice${NC}?"
 read choice
 
 case "$choice" in
